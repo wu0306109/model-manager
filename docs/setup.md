@@ -1,4 +1,4 @@
-# Set up the Local Enviornment
+# Set up the Local Environment
 
 ## Language Formattor
 
