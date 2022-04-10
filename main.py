@@ -10,13 +10,10 @@ client = google.cloud.logging.Client()
 client.get_default_handler()
 client.setup_logging()
 
-
-def main() -> NoReturn:
-    app = create_app()
-    app.run(debug=True,
-            host='0.0.0.0',
-            port=int(os.environ.get('PORT', '8080')))
-
-
 if __name__ == '__main__':
-    main()
+    app = create_app()
+    app.run(
+        debug=True,
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', '8080')),
+    )
