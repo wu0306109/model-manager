@@ -1,4 +1,4 @@
-import process_queue
+from model_manager import process_queue
 class upload_controller():
     process_queue:process_queue #process_queue
     def create_process_queue():

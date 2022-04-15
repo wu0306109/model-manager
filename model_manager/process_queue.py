@@ -1,4 +1,4 @@
-import process
+from model_manager import process
 class process_queue():
     processes_list:list
 
