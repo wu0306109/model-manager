@@ -1,8 +1,36 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 from typing import Any, NamedTuple
+
+from .file_manager import File
+
+
+class ProcessResultBase:
+
+    def __init__(self, initiator: str, start: datetime, end: datetime) -> None:
+        self._initiator = initiator  # TODO: to be update for role management
+        self._start = start
+        self._end = end
+
+    @abstractmethod
+    def describe(self) -> str:
+        """Describe process result in string for logging."""
+        pass
+
+
+class UploadResult(ProcessResultBase):
+
+    def __init__(self, initiator: str, start: datetime, end: datetime,
+                 file: File) -> None:
+        super().__init__(initiator, start, end)
+
+        self._file = file
+
+    def describe(self) -> str:
+        pass
 
 
 class ProcessManager():
@@ -10,28 +38,18 @@ class ProcessManager():
     def __init__(self):
         self.upload_process_queue = list()
 
-    def create_upload_process(self, file_name: str, file_path: Path,
-                              file_stream: Any) -> ProcessBase:
+    def request_upload(
+        self, file_name: str, file_path: Path, file_stream: Any
+    ) -> ProcessBase:  # TODO: typing of file stream should be updated
         pass
 
-    def push_process(self, process: ProcessBase) -> None:  #size
-        """Push a process to process manager.
-
-        Args:
-            process (ProcessBase): _description_
-
-        Raise:
-            ValueError: process exists
-        """
-        pass
-
-    def start_process(self, process_id: int) -> None:
+    def start(self, process_id: str) -> None:
         pass  # TODO: raise process_id not found error
 
-    def get_queue_size(self) -> int:
+    def check_progress(self, process_id: str) -> float:
         pass
 
-    def is_finish(self, process_id: int) -> bool:
+    def get_result(self, process_id: str) -> ProcessBase:
         pass
 
     #notify upload_controller process is finish
