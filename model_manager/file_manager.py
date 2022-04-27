@@ -64,10 +64,13 @@ class EtlCode(LoadedFileBase):
 class FileManager:
 
     def __init__(self) -> None:
+        self._files = {}
+
+    def list_files(self) -> List[File]:
         pass
 
-    def list_files(self):
+    def view_loaded_file(self, name: str) -> LoadedFileBase:
         pass
 
-    def view_file(self):
+    def add_file(self, file: File) -> None:
         pass
