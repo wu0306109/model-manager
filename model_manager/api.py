@@ -8,30 +8,20 @@ def hello_world() -> Response:
     return 'Hello, World!'
 
 
-@bp.route('/request-upload', methods=['POST'])
-def request_upload() -> Response:
+@bp.route('/upload-file-request', methods=['POST'])
+def upload_file_request (request) -> Response:
+    request_body = request.data
     """Request a upload process.
     Args:
         name (str)
         decription (str)
-
+      
     Return:
         process_id (str)
     
     do create process
     """
     pass
-
-@bp.route('/comfirm-request', methods=['POST'])
-def comfirm_request() -> Response:
-    """ comfirm request
-    Args:
-        process_id(str)
-        activate(boolean)
-    Return:
-
-    do put process into process queue
-    """
 @bp.route('/file-transport', method=['Post'])
 def transport_file():
     """ transport file
@@ -42,13 +32,13 @@ def transport_file():
     do process.write_file()
     """
 
-
-@bp.route('/check-progress')
-def check_progress() -> Response:
-    """
+@bp.route('/check-progress', methods=['POST'])
+def check_progress(request) -> Response:
+    """ comfirm request
     Args:
         process_id(str)
+        activate(boolean)
     Return:
-        progress(int)
-    do process.get_progress
+
+    do put process into process queue
     """
