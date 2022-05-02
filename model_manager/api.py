@@ -22,6 +22,7 @@ def request_upload() -> Response:
     """
     pass
 
+
 @bp.route('/comfirm-request', methods=['POST'])
 def comfirm_request() -> Response:
     """ comfirm request
@@ -32,7 +33,9 @@ def comfirm_request() -> Response:
 
     do put process into process queue
     """
-@bp.route('/file-transport', method=['Post'])
+
+
+@bp.route('/file-transport', methods=['Post'])
 def transport_file():
     """ transport file
     Args:
