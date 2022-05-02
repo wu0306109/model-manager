@@ -3,6 +3,9 @@ from typing import Any, Mapping
 
 from flask import Flask
 
+from model_manager.process_manager import ProcessManager
+
+# process_manager = ProcessManager()
 
 def create_app(test_config: Mapping[str, Any] = None) -> Flask:
     # create and configure the app
