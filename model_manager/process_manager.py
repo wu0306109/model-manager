@@ -37,7 +37,7 @@ class UploadResult(ProcessResultBase):
 
 class ProcessManager():
 
-    def __init__(self, file_path):
+    def __init__(self):
         self.upload_process_queue = list()
         self.file_path: str = '/temp'
         self.disk_path: str = '/'
