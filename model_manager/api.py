@@ -1,4 +1,5 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, current_app, flash, redirect, send_file, send_from_directory, url_for
+import os
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -55,3 +56,23 @@ def check_progress() -> Response:
         progress(int)
     do process.get_progress
     """
+
+
+@bp.route('list-files')
+def list_files() -> Response:
+    pass
+
+
+@bp.route('/files/<string:filename>')
+def view_file(filename: str) -> Response:
+    return redirect(url_for('.download_file', filename=filename))
+
+
+@bp.route('/files/<string:filename>/detail')
+def view_file_detail(filename: str) -> Response:
+    pass
+
+
+@bp.route('/files/<string:filename>/download')
+def download_file(filename: str) -> Response:
+    return send_from_directory(current_app.instance_path, filename)
