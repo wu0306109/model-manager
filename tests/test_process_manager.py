@@ -2,13 +2,14 @@ import os
 from pathlib import Path
 
 import pytest
-from model_manager.process_manager import ProcessManager, UploadProcess
+from model_manager.process_manager import ProcessManager
+from model_manager.process import Process
 
 
 class TestProcessManager:
 
     
-    def test_upload_file_requeset(self) -> String:
+    def test_create_process(self) -> None:
         manager = ProcessManager()
 
         file_name = 'name'
@@ -16,28 +17,50 @@ class TestProcessManager:
         process_id = manager.create_process(file_name, description)
         assert type(process_id) == type('')
 
-    def test_create(self) -> None:
+    def test_check_file_exist(self) -> None:
         manager = ProcessManager()
 
-        with open('./test-file.txt') as stream:
-            stream.write('test')
+        file_name = './exist-file.txt'
+        assert manager.check_file_exist(file_name)
 
-        with open('./test-file.txt') as stream:
-            process = manager.create_upload_process('test', Path('./data'),
-                                                    stream)
+    def test_load_file_list(self) -> None:
+        manager = ProcessManager()
 
-        assert type(process) == type(UploadProcess)
+        test_list = manager.load_file_list()
+        assert type(test_list) == type([])
+
+    def test_create_process(self) -> None:
+        manager = ProcessManager()
+
+        file_name = 'test_file.txt'
+        description = 'test'
+        process_id = manager.create_process(file_name, description)
+        assert type(process_id) == str
 
         os.remove('./test-file.txt')
 
-    def test_setProcess_stream() -> None:
+    def test_set_stream() -> None:
+        pass
+        # manager = ProcessManager()
+        # file_path = './data/'
+        # file_name = 'abc.txt'
+        # description = 'test'
+        # process = manager.create_process(file_name, description)
+        # with open(file_path + file_name, "rb") as file:
+        #     process.set_stream(file.stream)
+        # assert type(process.get_stream) == type
+        
+
+    def test_add_process() -> None:
         manager = ProcessManager()
+        
+        file_name = 'test_file.txt'
+        description = 'test'
+        process = manager.create_process(file_name, description)
 
-        with open('./test-file.txt') as stream:
-            process = manager.create_upload_process('test', Path('./data'),
-                                                    stream)
+        origin_size = manager.get_queue_size()
+        manager.add_process(process)
+        new_size = manager.get_queue_size()
+        assert new_size - origin_size == 1
+    
 
-            manager.push_process(process)
-
-            with pytest.raises(ValueError) as excinfo:
-                manager.push_process(process)

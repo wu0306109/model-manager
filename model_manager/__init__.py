@@ -2,6 +2,9 @@ import os
 
 from flask import Flask
 
+from model_manager.process_manager import ProcessManager
+
+# process_manager = ProcessManager()
 
 def create_app(test_config=None) -> Flask:
     # create and configure the app

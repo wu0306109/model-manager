@@ -1,7 +1,8 @@
-from flask import Blueprint, Response
-
+from flask import Blueprint, request,  Response
+from py import process
+from model_manager.process_manager import ProcessManager
 bp = Blueprint('api', __name__, url_prefix='/api')
-
+process_manager = ProcessManager()
 
 @bp.route('/')
 def hello_world() -> Response:
@@ -9,8 +10,9 @@ def hello_world() -> Response:
 
 
 @bp.route('/upload-file-request', methods=['POST'])
-def upload_file_request (request) -> Response:
-    request_body = request.data
+def upload_file_request () -> Response:
+    file_name = request.form.get("name")
+    description = request.form("description")
     """Request a upload process.
     Args:
         name (str)
@@ -22,7 +24,7 @@ def upload_file_request (request) -> Response:
     do create process
     """
     pass
-@bp.route('/file-transport', method=['Post'])
+@bp.route('/file-transport', methods=['Post'])
 def transport_file():
     """ transport file
     Args:
@@ -33,7 +35,7 @@ def transport_file():
     """
 
 @bp.route('/check-progress', methods=['POST'])
-def check_progress(request) -> Response:
+def check_progress() -> Response:
     """ comfirm request
     Args:
         process_id(str)
