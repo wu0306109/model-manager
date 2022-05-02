@@ -1,9 +1,10 @@
 import os
+from typing import Any, Mapping
 
 from flask import Flask
 
 
-def create_app(test_config=None) -> Flask:
+def create_app(test_config: Mapping[str, Any] = None) -> Flask:
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
