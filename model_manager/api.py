@@ -1,6 +1,5 @@
 from flask import (Blueprint, Response, current_app, redirect, request,
                    send_from_directory, url_for)
-from py import process
 
 from model_manager.process_manager import ProcessManager
 
