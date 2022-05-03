@@ -47,4 +47,5 @@ class FileDao:
             'last_used_time': file.last_used_time.timestamp(),
         }
 
-        ref.set(file_dict)
+        ref.set({})
+        ref.update(file_dict)
