@@ -1,11 +1,12 @@
 from __future__ import annotations
+from operator import truediv
 import shutil
 from abc import ABC, abstractmethod
 from distutils.command.upload import upload
 from datetime import datetime
 from pathlib import Path
 from typing import Any, NamedTuple
-from model_manager.process import Process, ProcessResultBase
+from model_manager.process import UploadProcess, ProcessResultBase
 from werkzeug.wsgi import LimitedStream
 import asyncio
 
@@ -23,13 +24,30 @@ import asyncio
 class ProcessManager():
 
     def __init__(self):
-        self.running_queue = list()
-        self.waiting_queue = list()
-        self.finish_queue = list()
-        self.max_thread_amount = 5
+        # self.process_queue = list()
+        self.max_process_amount:int = 5
         self.file_path:str = './temp/'
         self.disk_path:str = '/'
         asyncio.run(self.run_running_queue_process())
+
+    def load_waiting_process(self) -> list:
+        pass# dao
+        
+    def load_finish_process(self) -> list:
+        pass #dao
+    
+    def load_running_process(self) -> list:
+        pass # dao
+
+    def check_process_in_queue(self, process_id: str, process_queue: list) -> bool:
+        for process in process_queue:
+            if(process_id == process.get_process_id()):
+                return True
+        return False
+
+    def get_process_by_id(self, process_id: str) -> UploadProcess:
+        pass #DAO
+    
 
     # api upload file request
     def upload_file(self, file_name: str, description: str) -> str:
@@ -39,92 +57,55 @@ class ProcessManager():
             return 'space is run out'
         new_process_id = self.generate_process_id()
         new_process = self.create_process(new_process_id, file_name, description, self.file_path)
-        self.put_process_into_waiting_queue(new_process)
+        self.save_new_process(new_process)
         return new_process_id
+
+    def save_new_file_process(self, process: UploadProcess):
+        pass # dao save file
+
     def check_file_exist(self, file_name: str) -> bool:
-        return True # list all file in no sql
+        return True # dao list all file in no sql
 
     def check_storage_has_space(self, file_size: float) -> bool:
         total, used, free = shutil.disk_usage(self.disk_path)
         free = free//(2 ** 30)
+        #dao disk - running process size > 5G
         return True if (free - file_size) > 5 else False
 
     def generate_process_id(self) -> str:
         return "123"
 
     def create_process(self, process_id: str, file_name: str, description: str, file_path:str) -> None:
-        process = Process(process_id, file_name, description, file_path)
+        process = UploadProcess(process_id, file_name, description, file_path)
         return process
 
-    def get_process_by_id(self, process_id:str) -> Process:
-        for process in self.running_queue:
-            if(process.get_prcess_id() == process_id):
-                return process
-        for process in self.waiting_queue:
-            if(process.get_process_id() == process_id):
-                return process
-        for process in self.finish_queue:
-            if(process.get_process_id() == process_id):
-                return process
-        return None
-
-    def put_process_into_waiting_queue(self, process: Process):
-        if(not self.check_process_exist(process.get_process_id())):
-            self.waiting_queue.append(process)
-    
-    #TODO maybe need to throw error
-    def check_process_exist(self, process_id: str) -> bool:
-        for process in self.running_queue:
-            if(process.get_prcess_id() == process_id):
-                return True
-        for process in self.waiting_queue:
-            if(process.get_process_id() == process_id):
-                return True
-        for process in self.finish_queue:
-            if(process.get_process_id() == process_id):
-                return True
-        return False
-
     # api set process stream
-    def set_process_stream(self, process_id: str, file_stream: LimitedStream) -> str:
-        for process in self.waiting_queue:
-            if(process.get_process_id() == process_id):
-                process.set_stream(file_stream)
-                break
-          
-    def get_running_queue_size(self) -> int:
-        return len(self.running_queue)
-    
-    def get_waiting_queue_size(self) -> int:
-        return len(self.waiting_queue)
+    def transport_file(self, process_id: str, file_stream: LimitedStream, file_size: int) -> str:
+        waiting_process_queue = self.load_waiting_process()
+        running_process_queue = self.load_running_process()
+        finish_process_queue = self.load_finish_process()
+        if(self.check_process_in_queue(process_id, running_process_queue)):
+            return 'process is running'
+        if(self.check_process_in_queue(process_id, finish_process_queue)):
+            return 'process is finish'
+        if(not self.check_process_in_queue(process_id, waiting_process_queue)):
+            return 'process does not exist'
+        if(len(running_process_queue) >= self.max_process_amount):
+            return 'wait busy'
+        
+        process = self.get_process_by_id(self, process_id)
+        process.set_stream(file_stream, file_size)
+        
+        status = self.launch_process(self, process) # TODO status
+        if(status):
+            return 'upload finish'
+        else:
+            self.reset_process()
+            return 'upload fail'
+        
 
-    #api check progress
-    def check_progress(process_id: str) -> float:
-        pass
 
-    # run process ascy
-    async def run_running_queue_process(self):
-        while True:
-            asyncio.run(self.move_process_into_running_queue())
-            for process in self.running_queue:
-                if(not process.get_is_running()):
-                    asyncio.run(self.launch_process(process))
-            asyncio.run(self.move_process_into_finish_queue())
-            # if(len(self.running_queue) == 0 and len(self.waiting_queue) == 0):
-            #     break
-        return 0
-    
-    async def move_process_into_running_queue(self):
-        while True:
-            if(len(self.running_queue) < self.max_thread_amount):
-                for i in range(len(self.waiting_queue)):
-                    process = self.waiting_queue[i]
-                    if(not process.get_is_running() and process.get_stream() != None):
-                        self.waiting_queue.remove(i)
-                        self.running_queue.append(process)
-                        break
-            
-    async def launch_process(self, process: Process):
+    async def launch_process(self, process: UploadProcess):
         process.set_is_running(True)
         chunk_size = 1024
         stream = process.get_stream()
@@ -137,26 +118,29 @@ class ProcessManager():
                 process.set_progress(progress)
                 if len(chunk) == 0:
                     process.set_id_done(True)
-                    self.move_process_into_finish_queue(process)
-                    return 
+                    self.save_process_status(process)
+                    break
+                self.save_process_status(process)
                 file.write(chunk)
+            file.close()
     
-    async def move_process_into_finish_queue(self):
-        while True:
-            for i in range(len(self.running_queue)):
-                process = self.running_queue[i]
-                if(not process.get_is_running() and process.get_id_done()):
-                    self.running_queue.remove(i)
-                    self.finish_queue.append(process)
+    def save_process_status(self):
+        pass # dao
+    
+    def reset_process(self):
+        pass # reset dao
 
-    def start_process(self, process_id: int) -> None:
-        pass  # TODO: raise process_id not found error
+    #api check progress
+    def check_progress(self, process_id) -> str:
+        waiting_process_queue = self.load_waiting_process()
+        running_process_queue = self.load_running_process()
+        finish_process_queue = self.load_finish_process()
+        if(self.check_process_in_queue(process_id, running_process_queue)):
+            process = self.get_process_by_id(self, process_id)
+            return str(process.get_progress())
+        if(self.check_process_in_queue(process_id, finish_process_queue)):
+            return 'process is finish'
+        if(self.check_process_in_queue(process_id, waiting_process_queue)):
+            return 'process is waiting'
 
-    def is_finish(self, process_id: int) -> bool:
-        for process in self.upload_process_queue:
-            if(process.get_prcess_id() == process_id):
-                return process.is_finish()
-        return True
-
-    #notify upload_controller process is finish
 

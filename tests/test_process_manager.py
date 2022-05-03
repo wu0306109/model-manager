@@ -4,15 +4,37 @@ from pathlib import Path
 from itsdangerous import NoneAlgorithm
 import pytest
 from model_manager.process_manager import ProcessManager
-from model_manager.process import Process
+from model_manager.process import UploadProcess
 from werkzeug.wsgi import LimitedStream
 
 class TestProcessManager:
-    manager = ProcessManager('./temp/')
+
+    def test_load_waiting_process(self) -> None:
+        assert True #dao
+        
+    def test_load_finish_process(self) -> None:
+        assert True #dao
+    
+    def test_load_running_process(self) -> None:
+        assert True #dao
+    
+    def test_check_process_in_queue(self) -> None:
+        assert True
+
+    def test_get_process_by_id(self) -> None:
+        assert True
+    
+    # upload_file api test
+    def test_upload_file(self) -> None:
+        assert True
+
+    def test_save_new_file_process(self) -> None:
+        assert True
 
     def test_check_file_exist(self) -> None:
+        manager = ProcessManager()
         file_name = './exist-file.txt'
-        assert self.manager.check_file_exist(file_name)
+        assert manager.check_file_exist(file_name)
 
     def test_check_storage_has_space(self) -> None:
         assert self.manager.check_storage_has_space() > 0
@@ -23,30 +45,34 @@ class TestProcessManager:
         assert a != b
 
     def test_create_process(self) -> None:
-        # manager = ProcessManager()
+        manager = ProcessManager()
         file_name = 'name.txt'
         description = 'description'
         file_path = './temp/'
         process = self.manager.create_process(file_name, description)
         assert process.get_file_name() == 'name'
-    # def test_load_file_list(self) -> None:
-    #     manager = ProcessManager()
 
-    #     test_list = manager.load_file_list()
-    #     assert type(test_list) == type([])
-    def put_process_into_waiting_queue(self) -> None:
-        manager = ProcessManager('./temp/')
-        file_name = 'test_file.txt'
-        description = 'test'
-        process = manager.create_process(file_name, description)
+    #transport file api test 
+    def test_transport_file(self) -> None:
+        assert True
 
-        origin_size = manager.get_waiting_queue_size()
-        manager.put_process_into_waiting_queue(process)
-        new_size = manager.get_waiting_queue_size()
-        assert new_size - origin_size == 1
+    def test_launch_process(self) -> None:
+        assert True
+    
+    def test_save_process_status(self) -> None:
+        assert True
+    
+    def test_reset_process(self)->None:
+        assert True
 
+    # check progress
+    def test_check_progress(self) -> None:
+        assert True
+
+
+    # upload process test
     def test_set_stream(self) -> None:
-        manager = ProcessManager('./temp/')
+        manager = ProcessManager()
         file_path = './data/'
         file_name = 'abc.txt'
         description = 'test'
@@ -59,37 +85,6 @@ class TestProcessManager:
             limited_stream = process.get_stream()
             text = limited_stream.read(chunk_size)
             assert text.decode("utf-8") == "abc"
-    
-    def test_check_process_exist_false_case(self) -> None:
-        manager = ProcessManager('./temp/')
-        process_id = '123'
-        assert manager.check_process_exist(process_id)
-
-    def test_check_process_exist(self) -> None:
-        manager = ProcessManager('./temp/')
-        process_id = '123'
-        file_name = 'test.txt'
-        description = 'content'
-        file_path = './temp/'
-        process = Process(process_id, file_name, description, file_path)
-        manager.put_process_into_waiting_queue(process)
-        assert manager.check_process_exist(process_id)
-
-    def test_set_process_stream(self) -> None:
-        manager = ProcessManager('./temp/')
-        process_id = '123'
-        file_path = './data/'
-        file_name = 'abc.txt'
-        description = 'test'
-        chunk_size = 3
-        file_size = os.stat(file_path + file_name)
-        process = Process(process_id, file_name, description, file_path)
-        manager.put_process_into_waiting_queue(process)
-        with open(file_path + file_name, "rb") as file:
-            limited_stream = LimitedStream(file, file_size)
-            manager.set_process_stream(process_id, limited_stream)
-            stream = manager.get_process_by_id(process_id)
-            assert stream.read(chunk_size) == 'abc'
 
 
         
