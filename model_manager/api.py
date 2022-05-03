@@ -1,14 +1,10 @@
-<<<<<<< HEAD
-from flask import Blueprint, request,  Response
+from flask import Blueprint, request, Response
 from model_manager.process import Process
 
 from flask import (Blueprint, Response, current_app, redirect, request,
                    send_from_directory, url_for)
 
-from model_manager.process_manager import ProcessManager
-
 bp = Blueprint('api', __name__, url_prefix='/api')
-process_manager = ProcessManager('./temp')
 
 
 @bp.route('/')
@@ -32,6 +28,7 @@ def upload_file_request() -> Response:
     """
     pass
 
+
 @bp.route('/comfirm-request', methods=['POST'])
 def comfirm_request() -> Response:
     """ comfirm request
@@ -42,6 +39,8 @@ def comfirm_request() -> Response:
 
     do put process into process queue
     """
+
+
 @bp.route('/file-transport', methods=['Post'])
 def transport_file():
     """ transport file

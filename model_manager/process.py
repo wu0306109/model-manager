@@ -2,6 +2,7 @@ from werkzeug.wsgi import LimitedStream
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+
 class ProcessResultBase:
 
     def __init__(self, initiator: str, start: datetime, end: datetime) -> None:
@@ -14,21 +15,23 @@ class ProcessResultBase:
         """Describe process result in string for logging."""
         pass
 
+
 class ProcessBase(ABC):
 
     def __init__(self, process_id: str) -> None:
         self.process_id = process_id
-        self.start_time:float = datetime.now().timestamp()
-        self.end_time:float = None
+        self.start_time: float = datetime.now().timestamp()
+        self.end_time: float = None
 
     def set_process_done_time(self):
         self.end_time = datetime.now().timestamp()
-    
+
     def get_start_time(self):
         return self.start_time
-    
+
     def get_start_time(self):
         return self.end_time
+
 
 class Process(ProcessBase):
 
@@ -42,10 +45,10 @@ class Process(ProcessBase):
         self.progress: float = 0
         self.is_running: bool = False
         self.is_done: bool = False
-    
+
     def get_process_id(self):
         return self.process_id
-    
+
     def get_file_name(self):
         return self.file_name
 
@@ -64,10 +67,10 @@ class Process(ProcessBase):
 
     def get_progress(self) -> float:
         return self.progress
-    
+
     def get_is_running(self) -> bool:
         return self.is_running
-    
+
     def set_is_running(self, is_running: bool) -> bool:
         self.is_running = is_running
 
@@ -76,4 +79,3 @@ class Process(ProcessBase):
 
     def set_id_done(self, is_done: bool):
         self.is_doen = is_done
-    
