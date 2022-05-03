@@ -88,3 +88,29 @@ class TestFileManager:
         assert 'test-file-2' in [file.name for file in file_manager.files]
 
         # TODO: clean update files
+
+    def test_view_loaded_file(self) -> None:
+        dataframe = pd.DataFrame({
+            'a': [1, 2, 3],
+            'b': [4, 5, 6],
+            'c': [7, 8, 9],
+        })
+        dataframe.to_csv('./tests/test-dataframe.csv', index=False)
+
+        file = File(
+            name='test-csv-file',
+            type='dataset',
+            description='test-csv-file',
+            path='./tests/test-dataframe.csv',
+            uploader='test',
+            upload_time=datetime.now(),
+            last_used_time=datetime.now(),
+        )
+
+        file_manager = FileManager()
+        file_manager.add(file)
+        result = file_manager.view_loaded_file('test-csv-file')
+        assert result.dataframe.equals(dataframe)
+
+        # TODO: make execute even when exceptions issueed before
+        os.remove('./tests/test-dataframe.csv')

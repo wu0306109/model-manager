@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from datetime import datetime
+from importlib.abc import Loader
 from typing import Any, List, NamedTuple, Tuple
 
 from pandas import DataFrame, read_csv
@@ -120,7 +121,13 @@ class FileManager:
         return self._files
 
     def view_loaded_file(self, name: str) -> LoadedFileBase:
-        pass
+        file_names = [file.name for file in self.files]
+
+        if name not in file_names:
+            raise ValueError(f'file dose not exists ({name=})')
+
+        file = self.files[file_names.index(name)]
+        return file.load(FileLoader())
 
     def add(self, file: File) -> None:
         self._file_dao.update(file)
