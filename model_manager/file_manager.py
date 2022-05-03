@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from ctypes import Union
 from datetime import datetime
-from pathlib import Path
+from importlib.abc import Loader
 from typing import Any, List, NamedTuple, Tuple
-from unicodedata import name
 
-from matplotlib.image import thumbnail
+from pandas import DataFrame, read_csv
 
 
 class File(NamedTuple):
@@ -16,34 +14,65 @@ class File(NamedTuple):
 
     name: str
     type: str
-    path: Path
+    description: str
+    path: str
     uploader: str
     upload_time: datetime
-    last_used_time: datetime 
+    last_used_time: datetime
 
-    def load(self, loader: FileLoader) -> Any:
-        pass
+    def load(self, loader: FileLoader) -> LoadedFileBase:
+        if self.type == 'dataset':
+            return loader.load_dataset(self)
+        else:
+            raise NotImplementedError('to be update.')
 
 
 class FileLoader:
-    """
-    """
 
     def load_model(self, file: File) -> Model:
         pass
 
     def load_dataset(self, file: File) -> Dataset:
-        pass
+        if file.path.endswith('.csv'):
+            dataframe = read_csv(file.path)
+        else:
+            raise ValueError(f'Invalid file format ({file.path=})')
+
+        return Dataset(
+            name=file.name,
+            dataframe=dataframe,
+        )
 
     def load_etl_code(self, file: File) -> EtlCode:
         pass
 
 
-class LoadedFileBase(NamedTuple):
+class LoadedFileBase:
 
-    name: str
-    versions: List[File]
-    thumbnail: str
+    def __init__(self,
+                 name: str,
+                 type: str,
+                 versions: List[File] = None) -> None:
+        self._name = name
+        self._type = type
+        self._versions = versions if versions is not None else []
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> str:
+        return self._type
+
+    @property
+    def versions(self) -> List[File]:
+        return self._version
+
+    @property
+    @abstractmethod
+    def thumbnail(self) -> str:
+        pass
 
 
 class Model(LoadedFileBase):
@@ -53,7 +82,21 @@ class Model(LoadedFileBase):
 
 class Dataset(LoadedFileBase):
 
-    shape: Tuple[int, int]
+    def __init__(self,
+                 name: str,
+                 dataframe: DataFrame,
+                 versions: List[File] = None) -> None:
+        super().__init__(name=name, type='dataset', versions=versions)
+
+        self._dataframe = dataframe
+
+    @property
+    def dataframe(self) -> DataFrame:
+        return self._dataframe
+
+    @property
+    def thumbnail(self) -> str:
+        return str(self._dataframe.head())
 
 
 class EtlCode(LoadedFileBase):
@@ -64,13 +107,27 @@ class EtlCode(LoadedFileBase):
 class FileManager:
 
     def __init__(self) -> None:
-        self._files = {}
+        # TODO: solve circular import
+        from model_manager.firebase_daos import FileDao
+        self._file_dao = FileDao()
 
-    def list_files(self) -> List[File]:
-        pass
+        self._files = None
+
+    @property
+    def files(self) -> List[File]:
+        if self._files is None:
+            self._files = self._file_dao.get_all()
+
+        return self._files
 
     def view_loaded_file(self, name: str) -> LoadedFileBase:
-        pass
+        file_names = [file.name for file in self.files]
 
-    def add_file(self, file: File) -> None:
-        pass
+        if name not in file_names:
+            raise ValueError(f'file dose not exists ({name=})')
+
+        file = self.files[file_names.index(name)]
+        return file.load(FileLoader())
+
+    def add(self, file: File) -> None:
+        self._file_dao.update(file)

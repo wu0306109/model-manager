@@ -2,6 +2,7 @@ from werkzeug.wsgi import LimitedStream
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+
 class ProcessResultBase:
 
     def __init__(self, initiator: str, start: datetime, end: datetime) -> None:
@@ -13,6 +14,7 @@ class ProcessResultBase:
     def describe(self) -> str:
         """Describe process result in string for logging."""
         pass
+
 
 class ProcessBase(ABC):
 
@@ -62,6 +64,7 @@ class UploadProcess(ProcessBase):
         return self.file_path
 
     def get_file_name(self) -> str:
+
         return self.file_name
 
     def get_description(self) -> str:
@@ -82,4 +85,3 @@ class UploadProcess(ProcessBase):
 
     def set_progress(self, progress: float):
         self.progress = progress
-    

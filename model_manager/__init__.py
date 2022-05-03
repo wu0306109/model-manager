@@ -3,8 +3,6 @@ from typing import Any, Mapping
 
 from flask import Flask
 
-from model_manager.process_manager import ProcessManager
-
 # process_manager = ProcessManager()
 
 
