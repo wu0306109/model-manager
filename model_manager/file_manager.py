@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import abstractmethod
 from ctypes import Union
 from datetime import datetime
-from pathlib import Path
 from typing import Any, List, NamedTuple, Tuple
 from unicodedata import name
 
@@ -16,10 +15,11 @@ class File(NamedTuple):
 
     name: str
     type: str
-    path: Path
+    description: str
+    path: str
     uploader: str
     upload_time: datetime
-    last_used_time: datetime 
+    last_used_time: datetime
 
     def load(self, loader: FileLoader) -> Any:
         pass
@@ -63,14 +63,11 @@ class EtlCode(LoadedFileBase):
 
 class FileManager:
 
-    def __init__(self) -> None:
-        self._files = {}
-
-    def list_files(self) -> List[File]:
-        pass
+    def __init__(self, files: List[File] = None) -> None:
+        self.files = files if files is not None else []
 
     def view_loaded_file(self, name: str) -> LoadedFileBase:
         pass
 
-    def add_file(self, file: File) -> None:
+    def add(self, file: File) -> None:
         pass
