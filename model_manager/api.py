@@ -1,8 +1,7 @@
-from flask import Blueprint, request, Response
-from model_manager.process import Process
-
 from flask import (Blueprint, Response, current_app, redirect, request,
                    send_from_directory, url_for)
+
+from . import file_manager
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -66,7 +65,17 @@ def check_progress() -> Response:
 
 @bp.route('list-files')
 def list_files() -> Response:
-    pass
+    return {
+        file.name: {
+            'type': file.type,
+            'description': file.description,
+            'path': file.path,
+            'uploader': file.uploader,
+            'upload_time': file.upload_time.timestamp(),
+            'last_used_time': file.last_used_time.timestamp(),
+        }
+        for file in file_manager.files
+    }
 
 
 @bp.route('/files/<string:filename>')
