@@ -1,12 +1,7 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-from ctypes import Union
 from datetime import datetime
 from typing import Any, List, NamedTuple, Tuple
-from unicodedata import name
-
-from matplotlib.image import thumbnail
 
 
 class File(NamedTuple):
@@ -63,15 +58,22 @@ class EtlCode(LoadedFileBase):
 
 class FileManager:
 
-    def __init__(self, files: List[File] = None) -> None:
-        self._files = files if files is not None else []
+    def __init__(self) -> None:
+        # TODO: solve circular import
+        from model_manager.firebase_daos import FileDao
+        self._file_dao = FileDao()
+
+        self._files = None
 
     @property
     def files(self) -> List[File]:
+        if self._files is None:
+            self._files = self._file_dao.get_all()
+
         return self._files
 
     def view_loaded_file(self, name: str) -> LoadedFileBase:
         pass
 
     def add(self, file: File) -> None:
-        self._files.append(file)
+        self._file_dao.update(file)

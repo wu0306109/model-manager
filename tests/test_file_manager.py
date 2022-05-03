@@ -1,5 +1,6 @@
 from datetime import datetime
 from model_manager.file_manager import FileManager, File
+import pytest
 
 
 class TestFileManager:
@@ -26,12 +27,10 @@ class TestFileManager:
             last_used_time=datetime(2022, 5, 3, 11, 44),
         )
 
-        assert len(file_manager.files) == 0
-
         file_manager.add(file1)
-        assert len(file_manager.files) == 1
-        assert file_manager.files[0] == file1
-
         file_manager.add(file2)
-        assert len(file_manager.files) == 2
-        assert file_manager.files[1] == file2
+
+        assert 'test-file-1' in [file.name for file in file_manager.files]
+        assert 'test-file-2' in [file.name for file in file_manager.files]
+
+        # TODO: clean update files
