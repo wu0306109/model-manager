@@ -1,18 +1,8 @@
 from datetime import datetime
 
-from pytz import UTC
-import firebase_admin
 import pytest
-from firebase_admin import credentials
 from model_manager.file_manager import File
 from model_manager.firebase_daos import FileDao
-
-
-@pytest.fixture(scope='package', autouse=True)
-def initailize_flask_app() -> None:
-    cred = credentials.Certificate(
-        'secrets/model-manager-349101-firebase-adminsdk-pzrld-ca1a04e3a6.json')
-    firebase_admin.initialize_app(cred)
 
 
 class TestFileDao:
