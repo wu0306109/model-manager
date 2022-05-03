@@ -1,7 +1,7 @@
 import pytest
-from model_manager import app_creator
+from model_manager import create_app
 
-app = app_creator.create_app()
+app = create_app()
 
 @pytest.fixture()
 def app():
