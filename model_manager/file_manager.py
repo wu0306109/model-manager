@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from abc import abstractmethod
 from datetime import datetime
 from typing import Any, List, NamedTuple, Tuple
+
+from pandas import DataFrame, read_csv
 
 
 class File(NamedTuple):
@@ -16,29 +19,56 @@ class File(NamedTuple):
     upload_time: datetime
     last_used_time: datetime
 
-    def load(self, loader: FileLoader) -> Any:
+    def load(self, loader: FileLoader) -> LoadedFileBase:
         pass
 
 
 class FileLoader:
-    """
-    """
 
     def load_model(self, file: File) -> Model:
         pass
 
     def load_dataset(self, file: File) -> Dataset:
-        pass
+        if file.path.endswith('.csv'):
+            dataframe = read_csv(file.path)
+        else:
+            raise ValueError(f'Invalid file format ({file.path=})')
+
+        return Dataset(
+            name=file.name,
+            dataframe=dataframe,
+        )
 
     def load_etl_code(self, file: File) -> EtlCode:
         pass
 
 
-class LoadedFileBase(NamedTuple):
+class LoadedFileBase:
 
-    name: str
-    versions: List[File]
-    thumbnail: str
+    def __init__(self,
+                 name: str,
+                 type: str,
+                 versions: List[File] = None) -> None:
+        self._name = name
+        self._type = type
+        self._versions = versions if versions is not None else []
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> str:
+        return self._type
+
+    @property
+    def versions(self) -> List[File]:
+        return self._version
+
+    @property
+    @abstractmethod
+    def thumbnail(self) -> str:
+        pass
 
 
 class Model(LoadedFileBase):
@@ -48,7 +78,21 @@ class Model(LoadedFileBase):
 
 class Dataset(LoadedFileBase):
 
-    shape: Tuple[int, int]
+    def __init__(self,
+                 name: str,
+                 dataframe: DataFrame,
+                 versions: List[File] = None) -> None:
+        super().__init__(name=name, type='dataset', versions=versions)
+
+        self._dataframe = dataframe
+
+    @property
+    def dataframe(self) -> DataFrame:
+        return self._dataframe
+
+    @property
+    def thumbnail(self) -> str:
+        return str(self._dataframe.head())
 
 
 class EtlCode(LoadedFileBase):
