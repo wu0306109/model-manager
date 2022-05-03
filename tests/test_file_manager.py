@@ -34,8 +34,27 @@ class TestFileLoader:
 class TestFile:
 
     def test_load_csv_dataset(self) -> None:
+        dataframe = pd.DataFrame({
+            'a': [1, 2, 3],
+            'b': [4, 5, 6],
+            'c': [7, 8, 9],
+        })
+        dataframe.to_csv('./tests/test-dataframe.csv', index=False)
 
-        pass
+        file = File(
+            name='test-csv-file',
+            type='dataset',
+            description='test-csv-file',
+            path='./tests/test-dataframe.csv',
+            uploader='test',
+            upload_time=datetime.now(),
+            last_used_time=datetime.now(),
+        )
+        result = file.load(FileLoader())
+        assert result.dataframe.equals(dataframe)
+
+        # TODO: make execute even when exceptions issueed before
+        os.remove('./tests/test-dataframe.csv')
 
 
 class TestFileManager:

@@ -20,7 +20,10 @@ class File(NamedTuple):
     last_used_time: datetime
 
     def load(self, loader: FileLoader) -> LoadedFileBase:
-        pass
+        if self.type == 'dataset':
+            return loader.load_dataset(self)
+        else:
+            raise NotImplementedError('to be update.')
 
 
 class FileLoader:
