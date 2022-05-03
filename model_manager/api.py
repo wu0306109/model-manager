@@ -1,5 +1,5 @@
 from flask import (Blueprint, Response, current_app, redirect, request,
-                   send_from_directory, url_for)
+                   send_from_directory, url_for, abort)
 
 from . import file_manager
 
@@ -65,17 +65,7 @@ def check_progress() -> Response:
 
 @bp.route('list-files')
 def list_files() -> Response:
-    return {
-        file.name: {
-            'type': file.type,
-            'description': file.description,
-            'path': file.path,
-            'uploader': file.uploader,
-            'upload_time': file.upload_time.timestamp(),
-            'last_used_time': file.last_used_time.timestamp(),
-        }
-        for file in file_manager.files
-    }
+    return {'result': [file.name for file in file_manager.files]}
 
 
 @bp.route('/files/<string:filename>')
@@ -85,7 +75,21 @@ def view_file(filename: str) -> Response:
 
 @bp.route('/files/<string:filename>/detail')
 def view_file_detail(filename: str) -> Response:
-    pass
+    if filename not in (filenames :=
+                        [file.name for file in file_manager.files]):
+        abort(404, description='File not exists')
+
+    file = file_manager.files[filenames.index(filename)]
+    return {
+        file.name: {
+            'type': file.type,
+            'description': file.description,
+            'path': file.path,
+            'uploader': file.uploader,
+            'upload_time': file.upload_time.timestamp(),
+            'last_used_time': file.last_used_time.timestamp(),
+        }
+    }
 
 
 @bp.route('/files/<string:filename>/download')
