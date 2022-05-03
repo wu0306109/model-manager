@@ -64,10 +64,14 @@ class EtlCode(LoadedFileBase):
 class FileManager:
 
     def __init__(self, files: List[File] = None) -> None:
-        self.files = files if files is not None else []
+        self._files = files if files is not None else []
+
+    @property
+    def files(self) -> List[File]:
+        return self._files
 
     def view_loaded_file(self, name: str) -> LoadedFileBase:
         pass
 
     def add(self, file: File) -> None:
-        pass
+        self._files.append(file)
