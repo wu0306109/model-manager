@@ -22,7 +22,7 @@ import asyncio
 
 class ProcessManager():
 
-    def __init__(self, file_path):
+    def __init__(self):
         self.running_queue = list()
         self.waiting_queue = list()
         self.finish_queue = list()
@@ -41,7 +41,6 @@ class ProcessManager():
         new_process = self.create_process(new_process_id, file_name, description, self.file_path)
         self.put_process_into_waiting_queue(new_process)
         return new_process_id
-
     def check_file_exist(self, file_name: str) -> bool:
         return True # list all file in no sql
 
@@ -138,7 +137,7 @@ class ProcessManager():
                 process.set_progress(progress)
                 if len(chunk) == 0:
                     process.set_id_done(True)
-                    self.move_process_into_finish(process)
+                    self.move_process_into_finish_queue(process)
                     return 
                 file.write(chunk)
     

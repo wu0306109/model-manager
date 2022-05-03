@@ -7,6 +7,7 @@ from model_manager.process_manager import ProcessManager
 
 # process_manager = ProcessManager()
 
+
 def create_app(test_config: Mapping[str, Any] = None) -> Flask:
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -27,6 +28,10 @@ def create_app(test_config: Mapping[str, Any] = None) -> Flask:
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    @app.route('/')
+    def hello():
+        return 'Hello, World!'
 
     # register blueprints below
     from . import api
