@@ -20,29 +20,29 @@ class ProcessBase(ABC):
 
     def __init__(self, process_id: str) -> None:
         self.process_id = process_id
-        self.start_time:float = datetime.now().timestamp()
-        self.end_time:float = None
+        self.start_time: float = datetime.now().timestamp()
+        self.end_time: float = None
         self.is_running: bool = False
         self.is_done: bool = False
 
     def get_process_id(self) -> str:
         return self.process_id
-    
+
     def get_start_time(self) -> float:
         return self.start_time
-    
+
     def set_start_time(self, start_time):
         self.start_time = start_time
 
     def get_end_time(self) -> float:
         return self.end_time
-    
+
     def set_end_time(self, end_time: float):
         self.end_time = end_time
 
     def get_is_running(self) -> bool:
         return self.is_running
-    
+
     def set_is_running(self, is_running: bool):
         self.is_running = is_running
 
@@ -51,6 +51,7 @@ class ProcessBase(ABC):
 
     def set_is_done(self, is_done: bool):
         self.is_done = is_done
+
 
 class UploadProcess(ProcessBase):
 
@@ -81,7 +82,7 @@ class UploadProcess(ProcessBase):
 
     def get_file_size(self) -> int:
         return self.file_size
-    
+
     def set_file_size(self, file_size: int):
         self.file_size = file_size
 
