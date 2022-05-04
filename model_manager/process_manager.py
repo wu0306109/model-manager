@@ -8,6 +8,8 @@ from typing import Any, NamedTuple
 
 from model_manager.process import UploadProcess, ProcessResultBase
 from model_manager.firebase_daos import UploadProcessDao, FileDao
+from model_manager.file_manager import File
+from . import file_manager
 
 from datetime import datetime
 import uuid
@@ -124,6 +126,7 @@ class ProcessManager():
 
         self.launch_process(process)  # TODO status
         if (True):
+            self.process_to_file(process)
             return 'upload finish'
         else:
             self.reset_process(process)
@@ -179,3 +182,16 @@ class ProcessManager():
             return 'process is finish'
         if (self.check_process_in_queue(process_id, waiting_process_id_list)):
             return 'process is waiting'
+
+    def process_to_file(self, process: UploadProcess):
+        file_name = process.get_file_name()
+        file = File(
+            name = file_name,
+            type = file_name.split('.')[len(file_name.split('.')) - 1],
+            description = process.description(),
+            path = process.file_path(),
+            uploader = 'admin',
+            upload_time = datetime.fromtimestamp(process.get_end_time()),
+            last_used_time = datetime.fromtimestamp(process.get_end_time()),
+        )
+        file_manager.add(file)
