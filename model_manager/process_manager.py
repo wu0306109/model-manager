@@ -185,6 +185,8 @@ class ProcessManager():
 
     def process_to_file(self, process: UploadProcess):
         file_name = process.get_file_name()
+        print(file_name)
+        print(file_name.split('.')[len(file_name.split('.')) - 1])
         file = File(
             name = file_name,
             type = file_name.split('.')[len(file_name.split('.')) - 1],
