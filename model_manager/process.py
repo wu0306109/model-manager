@@ -28,10 +28,13 @@ class ProcessBase(ABC):
     def get_process_id(self) -> str:
         return self.process_id
     
-    def get_start_time(self):
+    def get_start_time(self) -> float:
         return self.start_time
+    
+    def set_start_time(self, start_time):
+        self.start_time = start_time
 
-    def get_end_time(self):
+    def get_end_time(self) -> float:
         return self.end_time
     
     def set_end_time(self, end_time: float):
@@ -40,18 +43,18 @@ class ProcessBase(ABC):
     def get_is_running(self) -> bool:
         return self.is_running
     
-    def set_is_running(self, is_running: bool) -> bool:
+    def set_is_running(self, is_running: bool):
         self.is_running = is_running
 
-    def get_id_done(self) -> bool:
-        return self.is_doen
+    def get_is_done(self) -> bool:
+        return self.is_done
 
-    def set_id_done(self, is_done: bool):
-        self.is_doen = is_done
+    def set_is_done(self, is_done: bool):
+        self.is_done = is_done
 
 class UploadProcess(ProcessBase):
 
-    def __init__(self, process_id, file_name, description, file_path):
+    def __init__(self, process_id, file_path, file_name, description):
         ProcessBase.__init__(self, process_id)
         self.file_path: str = file_path
         self.file_name: str = file_name
@@ -73,12 +76,14 @@ class UploadProcess(ProcessBase):
     def get_stream(self) -> LimitedStream:
         return self.file_stream
 
-    def set_stream(self, file_stream: LimitedStream, file_size: int):
+    def set_stream(self, file_stream: LimitedStream):
         self.file_stream = file_stream
-        self.file_size = file_size
 
     def get_file_size(self) -> int:
         return self.file_size
+    
+    def set_file_size(self, file_size: int):
+        self.file_size = file_size
 
     def get_progress(self) -> float:
         return self.progress
