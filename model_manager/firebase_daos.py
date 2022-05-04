@@ -36,7 +36,7 @@ class FileDao:
         return files
     
     def get_all_file_name_list(self) -> List[str]:
-        docs = self._client.collection('file').stream()
+        docs = self._client.collection('files').stream()
         file_name_list = []
         for doc in docs:
             file_name_list.append(doc.id)
@@ -59,7 +59,7 @@ class FileDao:
 
 class UploadProcessDao:
     def __init__(self) -> None:
-        self.client = firestore.cloent()
+        self._client = firestore.client()
     
     def get(self, process_id: str) -> UploadProcess:
         doc = self._client.collection('upload_process').document(process_id).get()
@@ -100,27 +100,27 @@ class UploadProcessDao:
     def get_all_waiting_process_id(self) -> List[str]:
         docs = self._client.collection('upload_process').stream()
         process_id_list = []
-        for doc in docs.list_documents():
+        for doc in docs:
             process_dict = doc.to_dict()
-            if process_dict.is_running == False and process_dict.is_done == False:
+            if process_dict['is_running'] == False and process_dict['is_done'] == False:
                 process_id_list.append(doc.id)
         return process_id_list
 
     def get_all_running_process_id(self) -> List[str]:
         docs = self._client.collection('upload_process').stream()
         process_id_list = []
-        for doc in docs.list_documents():
+        for doc in docs:
             process_dict = doc.to_dict()
-            if process_dict.is_running == True and process_dict.is_done == False:
+            if process_dict['is_running'] == True and process_dict['is_done'] == False:
                 process_id_list.append(doc.id)
         return process_id_list
 
     def get_all_finish_process_id(self) -> List[str]:
         docs = self._client.collection('upload_process').stream()
         process_id_list = []
-        for doc in docs.list_documents():
+        for doc in docs:
             process_dict = doc.to_dict()
-            if process_dict.is_done == True:
+            if process_dict['is_done'] == True:
                 process_id_list.append(doc.id)
         return process_id_list
     
@@ -135,7 +135,7 @@ class UploadProcessDao:
             'file_name' : process.get_file_name(),
             'description' : process.get_description(),
             'file_size' : process.get_file_size(),
-            'file_progress' : process.get_progress()
+            'progress' : process.get_progress()
         }
         ref.update(process_dict)
 
@@ -151,6 +151,11 @@ class UploadProcessDao:
             'file_name' : process.get_file_name(),
             'description' : process.get_description(),
             'file_size' : process.get_file_size(),
-            'file_progress' : process.get_progress()
+            'progress' : process.get_progress()
         }
         ref.document(process.get_process_id()).set(process_dict)
+
+    def delete(self, process: UploadProcess) -> None:
+        ref = self._client.collection('upload_process')
+        ref.document(process.get_process_id()).delete()
+

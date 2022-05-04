@@ -32,9 +32,8 @@ class ProcessManager():
     def __init__(self):
         # self.process_queue = list()
         self.max_process_amount:int = 5
-        self.file_path:str = './temp/'
+        self.file_path:str = './data/temp/'
         self.disk_path:str = '/'
-        asyncio.run(self.run_running_queue_process())
 
     def load_waiting_process_id(self) -> list:
         dao = UploadProcessDao()
@@ -77,27 +76,27 @@ class ProcessManager():
         process_file_list = process_dao.get_all_file()
         file_list = file_dao.get_all_file_name_list()
         if(file_name in file_list):
-            if(file_name in process_file_list):
-                return True
+            return True
+        if(file_name in process_file_list):
             return True
         return False
 
-    def check_storage_has_space(self, file_size: float) -> bool:
+    def check_storage_has_space(self) -> bool:
         total, used, free = shutil.disk_usage(self.disk_path)
         free = free//(2 ** 30)
         waiting_process_id_list = self.load_waiting_process_id()
         files_size = 0
         for id in waiting_process_id_list:
             process = self.get_process_by_id(id)
-            file_size += process.get_file_size()
+            files_size += process.get_file_size()
         files_size = files_size//(2 ** 30)
         #disk - running processes'size > 5G return True
-        return True if (free - file_size) > 5 else False
+        return True if (free - files_size) > 5 else False
 
     def generate_process_id(self) -> str:
         return str(uuid.uuid4())
 
-    def create_process(self, process_id: str, file_path:str, file_name: str, description: str) -> None:
+    def create_process(self, process_id: str, file_path: str, file_name: str, description: str) -> None:
         process = UploadProcess(process_id, file_path, file_name, description)
         return process
 
@@ -115,11 +114,11 @@ class ProcessManager():
         if(len(running_process_id_list) >= self.max_process_amount):
             return 'wait busy'
         
-        process = self.get_process_by_id(self, process_id)
+        process = self.get_process_by_id(process_id)
         process.set_stream(file_stream)
         process.set_file_size(file_size)
         
-        status = self.launch_process(self, process) # TODO status
+        status = self.launch_process(process) # TODO status
         if(status):
             return 'upload finish'
         else:
@@ -168,7 +167,7 @@ class ProcessManager():
         running_process_id_list = self.load_running_process_id()
         finish_process_id_list = self.load_finish_process_id()
         if(self.check_process_in_queue(process_id, running_process_id_list)):
-            process = self.get_process_by_id(self, process_id)
+            process = self.get_process_by_id(process_id)
             return str(process.get_progress())
         if(self.check_process_in_queue(process_id, finish_process_id_list)):
             return 'process is finish'

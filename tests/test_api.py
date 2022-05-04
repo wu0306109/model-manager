@@ -10,8 +10,8 @@ from model_manager.file_manager import File
 from werkzeug.test import Client
 
 
-@pytest.fixture
-def app() -> Generator[Flask]:
+@pytest.fixture()
+def app():
     app = create_app()
     app.config.update({
         "TESTING": True,
