@@ -6,8 +6,6 @@ from distutils.command.upload import upload
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from py import process
-
 from model_manager.process import UploadProcess, ProcessResultBase
 from model_manager.firebase_daos import UploadProcessDao, FileDao
 

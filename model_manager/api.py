@@ -25,8 +25,9 @@ def upload_file_request() -> Response:
 def transport_file():
     manager = ProcessManager()
     process_id = request.form.get("process_id")
+    file_size = int(request.headers["Content-Length"])
     stream = request.stream
-    result = manager.transport_file(process_id, stream)
+    result = manager.transport_file(process_id, stream, file_size)
     return result
 
 
