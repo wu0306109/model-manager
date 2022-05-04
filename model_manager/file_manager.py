@@ -130,4 +130,5 @@ class FileManager:
         return file.load(FileLoader())
 
     def add(self, file: File) -> None:
+        # TODO: update self._files
         self._file_dao.update(file)
