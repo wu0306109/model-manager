@@ -21,12 +21,14 @@ def upload_file_request() -> Response:
     process_id = manager.upload_file_request(file_name, description)
     return process_id
 
-@bp.route('/file-transport', methods=['Post'])
+@bp.route('/file-transport', methods=['POST'])
 def transport_file():
     manager = ProcessManager()
     process_id = request.form.get("process_id")
+    stream = request.files['file']
+    print(process_id)
+    print(type(stream))
     file_size = int(request.headers["Content-Length"])
-    stream = request.stream
     result = manager.transport_file(process_id, stream, file_size)
     return result
 

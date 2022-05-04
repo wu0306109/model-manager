@@ -122,11 +122,11 @@ class ProcessManager():
         process.set_stream(file_stream)
         process.set_file_size(file_size)
 
-        status = self.launch_process(process)  # TODO status
-        if (status):
+        self.launch_process(process)  # TODO status
+        if (True):
             return 'upload finish'
         else:
-            self.reset_process()
+            self.reset_process(process)
             return 'upload fail'
 
     def launch_process(self, process: UploadProcess):
@@ -147,6 +147,8 @@ class ProcessManager():
                     process.set_is_done(True)
                     process.set_is_running(False)
                     self.save_process_status(process)
+                    self.save_process_status(process)
+                    file.close()
                     break
                 self.save_process_status(process)
                 file.write(chunk)
