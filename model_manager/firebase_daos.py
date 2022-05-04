@@ -53,8 +53,9 @@ class FileDao:
             'upload_time': file.upload_time.timestamp(),
             'last_used_time': file.last_used_time.timestamp(),
         }
-
         ref.set(file_dict)
+        ref.set({})
+        ref.update(file_dict)
 
 class UploadProcessDao:
     def __init__(self) -> None:
