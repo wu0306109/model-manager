@@ -51,22 +51,16 @@ class TestProcessManager:
             process = manager.get_process_by_id('finish')
             assert process.get_is_done() == True
     
-    def test_load_running_process(self) -> None:
-        manager = ProcessManager()
+    def test_load_running_process(self, manager) -> None:
         processs_id_list = manager.load_waiting_process_id()
         if(processs_id_list != None and len(processs_id_list) > 0):
             process = manager.get_process_by_id('running')
-            assert process.get_is_running() == True and process.get_is_done == False
+            assert process.get_is_running() == True and process.get_is_done() == False
     
     def test_check_process_in_queue_not_exist_case(self) -> None:
         manager = ProcessManager()
         process_id = 'not exist'
         assert not manager.check_process_in_queue(process_id, [])
-
-    def test_check_process_in_queue_exist_case(self) -> None:
-        manager = ProcessManager()
-        process_id = 'exist'
-        assert manager.check_process_in_queue(process_id, ['exist'])
 
     def test_get_process_by_id(self, manager) -> None:
         process_id = 'waiting'
@@ -77,42 +71,17 @@ class TestProcessManager:
     def test_upload_file_request(self, manager) -> None:
         dao = UploadProcessDao()
         old_list = manager.load_waiting_process_id()
-        file_name = 'test_upload_file'
-        description = "description"
+        file_name = 'abc.txt'
+        description = "upload_file_request"
         process_id =  manager.upload_file_request(file_name, description)
         process = manager.get_process_by_id(process_id)
         new_list = manager.load_waiting_process_id()
         dao.delete(process)
         assert len(new_list) - len(old_list) == 1 and process.get_process_id() == process_id
 
-    def test_save_new_file_process(self, manager) -> None:
-        process = UploadProcess('test_new', '/temp/', 'test_upload_file', 'description')
-        process.set_end_time(datetime.now().timestamp())
-        assert True
-
-    def test_check_file_exist(self, manager) -> None:
-        file_name = 'waiting process.txt'
-        assert manager.check_file_exist(file_name)
-
     def test_check_storage_has_space(self) -> None:
         manager = ProcessManager()
         assert manager.check_storage_has_space() > 0
-
-    def test_generate_process_id(self, manager) -> None:
-        id = manager.generate_process_id()
-        id_list = []
-        for i in range(100):
-            id_list.append(manager.generate_process_id())
-        assert id not in id_list
-
-    def test_create_process(self) -> None:
-        manager = ProcessManager()
-        process_id = 'id'
-        file_path = '/temp/'
-        file_name = 'name.txt'
-        description = 'test_create_process'
-        process = manager.create_process(process_id, file_path, file_name, description)
-        assert process.get_file_name() == 'name.txt'
 
     #transport file api test 
     def test_transport_file(self, manager) -> None:
@@ -131,24 +100,6 @@ class TestProcessManager:
         dao.delete(process)
         with open(file_path + file_name, "rb") as file:
             assert file.readline().decode("utf-8") == 'abc\r\n'
-
-    def test_launch_process(self, manager) -> None:
-        dao = UploadProcessDao()
-        process_id = 'test_launch_process'
-        file_path = './data/temp/'
-        file_name = 'abc.txt'
-        description = 'test_launch_process'
-        process = manager.create_process(process_id, file_path, file_name, description)
-        process.set_file_size(100)
-        with open('./data/abc.txt', 'rb') as file:
-            process.set_stream(LimitedStream(file, os.stat('./data/abc.txt').st_size))
-            manager.launch_process(process)
-        process = manager.get_process_by_id(process_id)
-        dao.delete(process)
-        assert process.get_is_done() and process.get_progress() == 1
-    
-    def test_save_process_status(self) -> None:
-        assert True
     
     def test_reset_process(self, manager)->None:
         process = manager.get_process_by_id('running')
