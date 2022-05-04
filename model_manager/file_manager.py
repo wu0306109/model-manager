@@ -130,5 +130,7 @@ class FileManager:
         return file.load(FileLoader())
 
     def add(self, file: File) -> None:
-        # TODO: update self._files
         self._file_dao.update(file)
+
+        if self._files is not None:
+            self._files.append(file)
