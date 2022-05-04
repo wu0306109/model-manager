@@ -3,7 +3,7 @@ from pathlib import Path
 from pydoc import describe
 from itsdangerous import NoneAlgorithm
 import pytest
-from model_manager.firebase_daos import UploadProcessDao
+from model_manager.firebase_daos import UploadProcessDao, FileDao
 from model_manager.process_manager import ProcessManager
 from model_manager.process import UploadProcess
 from werkzeug.wsgi import LimitedStream
@@ -100,6 +100,8 @@ class TestProcessManager:
         dao.delete(process)
         with open(file_path + file_name, "rb") as file:
             assert file.readline().decode("utf-8") == 'abc\r\n'
+        fdao = FileDao()
+        fdao.delete(file_name)
     
     def test_reset_process(self, manager)->None:
         process = manager.get_process_by_id('running')

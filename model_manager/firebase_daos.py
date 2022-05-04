@@ -54,6 +54,10 @@ class FileDao:
             'last_used_time': file.last_used_time.timestamp(),
         }
         ref.set(file_dict)
+    
+    def delete(self, file_name: str) -> None:
+        ref = self._client.collection('files')
+        ref.document(file_name).delete()
 
 class UploadProcessDao:
     def __init__(self) -> None:

@@ -1,4 +1,5 @@
 import os
+import io
 from collections.abc import Generator
 from datetime import datetime
 
@@ -7,6 +8,10 @@ import pytest
 from flask import Flask
 from model_manager import create_app, file_manager
 from model_manager.file_manager import File
+from model_manager.process_manager import ProcessManager
+from model_manager.process import UploadProcess
+from model_manager.firebase_daos import UploadProcessDao, FileDao
+
 from werkzeug.test import Client
 
 
@@ -33,6 +38,59 @@ def test_hello_world(client: Client) -> None:
     response = client.get('/api/')
     assert response.data == b'Hello, World!'
 
+def test_upload_file_request(client: Client) -> None:
+    manager = ProcessManager()
+    dao = UploadProcessDao()
+    file_name = "abc.txt"
+    description = "test_upload_file"
+    file_dict = {'name': file_name, 'description': description}
+    result = client.post('/api/upload-file-request', data = file_dict)
+    process_id = result.text
+    assert result.status == '200 OK'
+    process = manager.get_process_by_id(process_id)
+    dao.delete(process)
+
+def test_file_transport(client: Client) -> None:
+    manager = ProcessManager()
+    dao = UploadProcessDao()
+    file_name = "abc.txt"
+    description = "test_upload_file_api"
+    file_dict = {'name': file_name, 'description': description}
+    result = client.post('/api/upload-file-request', data = file_dict)
+    process_id = result.text
+
+    path = './data/'
+    file_name = 'abc.txt'
+
+    with open(path + file_name, 'rb') as file_obj:
+        file_size = os.stat(path + file_name).st_size
+        headers = {'Content-Length' : str(file_size)}
+        data = {"process_id": process_id,
+                'file': (io.BytesIO(file_obj.read()), file_name)}
+        result = client.post("/api/file-transport", headers = headers, data = data)
+        assert result.text == 'upload finish'
+    
+    process = manager.get_process_by_id(process_id)
+    dao.delete(process)
+    fdao = FileDao()
+    fdao.delete(file_name)
+
+def test_check_progress(client: Client) -> None:
+    manager = ProcessManager()
+    dao = UploadProcessDao()
+
+    file_name = "abcd.txt"
+    description = "test_upload_file"
+    file_dict = {'name': file_name, 'description': description}
+    result = client.post('/api/upload-file-request', data = file_dict)
+    process_id = result.text
+
+    param = {"process_id": process_id}
+    reslut = client.post("/api/check-progress", data = param)
+    assert reslut.text == 'process is waiting'
+
+    process = manager.get_process_by_id(process_id)
+    dao.delete(process)
 
 def test_list_files(client: Client) -> None:
     # TODO: add files by uploading API rather than by file manager

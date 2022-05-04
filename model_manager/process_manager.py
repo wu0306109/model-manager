@@ -188,8 +188,8 @@ class ProcessManager():
         file = File(
             name = file_name,
             type = file_name.split('.')[len(file_name.split('.')) - 1],
-            description = process.description(),
-            path = process.file_path(),
+            description = process.get_description(),
+            path = process.get_file_path(),
             uploader = 'admin',
             upload_time = datetime.fromtimestamp(process.get_end_time()),
             last_used_time = datetime.fromtimestamp(process.get_end_time()),
